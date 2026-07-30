@@ -7,7 +7,7 @@ y = linspace(-5,5,100);
 samples = (x.' + y) ./ (4 + cos(x.') + cos(y));
 
 % Approximate data via p-AAA with error tolerance 1e-5
-bf = paaa(samples,{x,y},1e-5);
+[bf,info] = paaa(samples,{x,y},1e-5);
 
 % Evaluate rational approximation at a single points
 bf.eval([0,0])
