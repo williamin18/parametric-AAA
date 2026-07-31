@@ -1,4 +1,16 @@
 
+%%
+% X = lhsdesign(10000,2);
+% X = X*10-5;
+
+x = linspace(-5,5,100)';
+y = linspace(-5,5,100)';
+X = [kron(ones(100,1),x) kron(y, ones(100,1))];
+
+samples = (X(:,1) + X(:,2) ) ./ (4 + cos(X(:,1)) + cos(X(:,2)));
+% [bf,info] = paaa2(samples,X,1e-5);
+
+
 %% 2-variable scalar function
 
 % Generate test data
@@ -26,6 +38,8 @@ bf.poles({5},2)
 
 % Compute multiple poles with respect to the second variable y, and the fixed values x=1,3,5
 bf.poles({[1,3,5]},2)
+
+
 
 %% 2-variable matrix-valued function
 

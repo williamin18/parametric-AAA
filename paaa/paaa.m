@@ -143,7 +143,7 @@ while (max_err > max_samples * tol && j < options.max_iter) || any(num_nodes<opt
 
     % solve LS problem
     L = loewner_mat(samples,sampling_values,nodes_part,real_transforms);
-    [~,~,X] = svd(L,0);
+    [~,S,X] = svd(L,0);
     denom_coefs = X(:,end);
     
     % set zero coefficients to machine epsilon to avoid numerical issues
