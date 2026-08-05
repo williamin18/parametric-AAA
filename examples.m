@@ -1,11 +1,11 @@
 
 %%
-% X = lhsdesign(10000,2);
-% X = X*10-5;
+X = lhsdesign(10000,2);
+X = X*10-5;
 
-x = linspace(-5,5,100)';
-y = linspace(-5,5,100)';
-X = [kron(ones(100,1),x) kron(y, ones(100,1))];
+% x = linspace(-5,5,100)';
+% y = linspace(-5,5,100)';
+% X = [kron(ones(100,1),x) kron(y, ones(100,1))];
 
 samples = (X(:,1) + X(:,2) ) ./ (4 + cos(X(:,1)) + cos(X(:,2)));
 % [bf,info] = paaa2(samples,X,1e-5);
