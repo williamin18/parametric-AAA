@@ -75,3 +75,5 @@ samples_test = sub_samples(split_idx+1:N);
 disp(epoch)
 disp([training_err,test_err])
 samples_recovered = TTfull(samples_TT);
+
+lr_bf = paaa_TT(samples_recovered,{x,y,z,w},1e-3,4);

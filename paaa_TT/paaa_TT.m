@@ -77,6 +77,8 @@ options.als_options.more_info = options.more_info;
 if options.real_loewner
     [options.als_options.real_transforms.UL,sampling_values,samples] = init_JD(sampling_values,samples);
 end
+%TODO: ensure real
+
 
 
 
@@ -88,6 +90,11 @@ info.rel_ls_errors = [];
 info.rel_linearized_ls_errors = [];
 info.rel_validation_max_errors = [];
 info.rel_validation_ls_errors = [];
+
+
+%Greedy initial sample selection
+
+
 
 max_samples = max(abs(samples),[],'all');
 norm_2_samples = norm(samples(:))^2;
