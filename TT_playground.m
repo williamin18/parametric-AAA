@@ -1,3 +1,4 @@
+% Generate test data
 x = linspace(-5,5,25);
 y = linspace(-5,5,25);
 z = linspace(-5,5,25);
@@ -11,4 +12,4 @@ for i = 1:25
 end
 
 % Approximate data via low-rank p-AAA with error tolerance 1e-3 and tensor rank 3
-lr_bf = paaa_TT(samples,{x,y,z},1e-3,3);
+lr_bf = lr_paaa(samples,{x,y,z},1e-3,3);

@@ -35,7 +35,10 @@ if nargin < 5
     options = struct;
 end
 
-num_vars = length(sampling_values);
+%Basic TT properties
+samples = TTorthogonalizeLR(samples);
+[num_vars,m,r] = TTsizes(samples);
+norm_2_samples = norm(samples{d},'fro');
 
 if ~isfield(options,'nodes_part')
     nodes_part = cell(1,num_vars);
@@ -56,7 +59,7 @@ if ~isfield(options,'reuse_coefs_ALS')
 end
 
 if ~isfield(options,'max_nodes')
-    options.max_nodes = size(samples) - 1;
+    options.max_nodes = m - 1;
     if options.real_loewner
         options.max_nodes(1) = options.max_nodes(1) - 1;
     end
@@ -92,20 +95,25 @@ info.rel_validation_max_errors = [];
 info.rel_validation_ls_errors = [];
 
 
+
+
+
 %Greedy initial sample selection
+init_idx = floor(rand(d,1).*m)+1;
+[max_idx,max_err] = greedy_maxerr(x,init_idx)
 
 
 
-max_samples = max(abs(samples),[],'all');
-norm_2_samples = norm(samples(:))^2;
-
-err_mat = abs(samples-mean(samples,'all'));
-[max_err,max_idx] = max(err_mat,[],'all');
-rel_ls_err = norm(err_mat(:))^2 / norm_2_samples;
-fprintf('LR p-AAA Initial     | rel max err %.3e | rel LS err %.3e\n', max_err/max_samples, rel_ls_err);
+% max_samples = max(abs(samples),[],'all');
+% norm_2_samples = norm(samples(:))^2;
+% 
+% err_mat = abs(samples-mean(samples,'all'));
+% [max_err,max_idx] = max(err_mat,[],'all');
+% rel_ls_err = norm(err_mat(:))^2 / norm_2_samples;
+% fprintf('LR p-AAA Initial     | rel max err %.3e | rel LS err %.3e\n', max_err/max_samples, rel_ls_err);
 
 % do this such that p-AAA does at least one iteration
-max_err = Inf;
+err_norm = Inf;
 
 max_Idx = cell(1,num_vars);
 j = 0;
@@ -115,11 +123,9 @@ j = 0;
 %   Main low-rank p-AAA iteration
 %
 
-while max_err/max_samples > tol && j < options.max_iter
+while err_norm/norm_2_samples > tol && j < options.max_iter
 
     j = j + 1;
-
-    [max_Idx{:}] = ind2sub(size(samples),max_idx);
 
     % check if maximum order has been reached
     add_itpl = cellfun(@(ip,mi)length(ip)<mi,nodes_part,num2cell(options.max_nodes));
@@ -132,13 +138,13 @@ while max_err/max_samples > tol && j < options.max_iter
     for i = 1:num_vars
         % make sure to keep at least one sample in LS partition
         if add_itpl(i)
-            nodes_part{i} = unique([nodes_part{i},max_Idx{i}],'stable');
+            nodes_part{i} = unique([nodes_part{i},max_idx{i}],'stable');
             % also interpolate the complex conjugate in the first variable if 'real_loewner=true'
-            if i == 1 && options.real_loewner && imag(sampling_values{i}(max_Idx{i})) ~= 0
-                % find the complex conjugate
-                [~,min_idx] = min(abs(conj(sampling_values{1}(max_Idx{i})) - sampling_values{1}));
-                nodes_part{i} = unique([nodes_part{i},min_idx],'stable');
-            end
+            % if i == 1 && options.real_loewner && imag(sampling_values{i}(max_Idx{i})) ~= 0
+            %     % find the complex conjugate
+            %     [~,min_idx] = min(abs(conj(sampling_values{1}(max_Idx{i})) - sampling_values{1}));
+            %     nodes_part{i} = unique([nodes_part{i},min_idx],'stable');
+            % end
         end
     end
 
