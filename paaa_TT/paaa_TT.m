@@ -37,7 +37,7 @@ end
 
 %Basic TT properties
 samples = TTorthogonalizeLR(samples);
-[num_vars,m,r] = TTsizes(samples);
+[num_vars,m_max,r_samples] = TTsizes(samples);
 norm_2_samples = norm(samples{d},'fro');
 
 if ~isfield(options,'nodes_part')
@@ -59,7 +59,7 @@ if ~isfield(options,'reuse_coefs_ALS')
 end
 
 if ~isfield(options,'max_nodes')
-    options.max_nodes = m - 1;
+    options.max_nodes = m_max - 1;
     if options.real_loewner
         options.max_nodes(1) = options.max_nodes(1) - 1;
     end
@@ -99,7 +99,7 @@ info.rel_validation_ls_errors = [];
 
 
 %Greedy initial sample selection
-init_idx = floor(rand(d,1).*m)+1;
+init_idx = floor(rand(d,1).*m_max)+1;
 [max_idx,max_err] = greedy_maxerr(x,init_idx)
 
 
@@ -149,14 +149,15 @@ while err_norm/norm_2_samples > tol && j < options.max_iter
     end
 
     % in order to compute a real loewner matrix we need orthogonal transformation matrices
-    if options.real_loewner
-        options.als_options.real_transforms.UR = get_JH(sampling_values,nodes_part);
-    end
+    % if options.real_loewner
+    %     options.als_options.real_transforms.UR = get_JH(sampling_values,nodes_part);
+    % end
 
     % if we reuse barycentric coefficients as the ALS initialization we must extract them from the previous barycentric form
     if options.reuse_coefs_ALS
         if j == 1
-            coefs_init = cellfun(@(ip) randn(length(ip), coef_rank), nodes_part, 'UniformOutput', false);
+            % coefs_init = cellfun(@(ip) randn(length(ip), coef_rank), nodes_part, 'UniformOutput', false);
+            coefs_init =  num2cell(ones(d,1));
         else
             prev_coef_rank = length(bf.denom_coefs.lambda);
             prev_coefs = bf.denom_coefs.U;
