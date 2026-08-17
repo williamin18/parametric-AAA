@@ -37,7 +37,8 @@ end
 
 %Basic TT properties
 samples = TTorthogonalizeLR(samples);
-[num_vars,m_max,r_samples] = TTsizes(samples);
+[d,m_max,r_samples] = TTsizes(samples);
+num_vars = d;
 norm_2_samples = norm(samples{d},'fro');
 
 if ~isfield(options,'nodes_part')
@@ -159,16 +160,11 @@ while err_norm/norm_2_samples > tol && j < options.max_iter
             % coefs_init = cellfun(@(ip) randn(length(ip), coef_rank), nodes_part, 'UniformOutput', false);
             coefs_init =  num2cell(ones(d,1));
         else
-            prev_coef_rank = length(bf.denom_coefs.lambda);
-            prev_coefs = bf.denom_coefs.U;
-            coefs_init = cell(1,num_vars);
+            [~,m_coef,prev_coef_rank] = TTranks(bf.denom_coefs);
+            coef_init = bf.denom_coefs;
             for i = 1:num_vars
-                coefs_init{i} = zeros(length(nodes_part{i}), coef_rank);
-                coefs_init{i}(1:size(prev_coefs{i},1),1:size(prev_coefs{i},2)) = prev_coefs{i};
-                % if the previous coefficients were rank-deficient need to fill
-                % up with random values
-                if prev_coef_rank < coef_rank
-                    coefs_init{i}(:,prev_coef_rank+1:end) = rand(length(nodes_part{i}), coef_rank - prev_coef_rank);
+                if length(nodes_part{i}) > m_coef(i)
+                    coef_init{i} = [coef_init{i}; zeros(prev_coef_rank(i),prev_coef_rank(i+1))];
                 end
             end
         end
