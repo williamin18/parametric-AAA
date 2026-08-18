@@ -160,15 +160,22 @@ while err_norm/norm_2_samples > tol && j < options.max_iter
             % coefs_init = cellfun(@(ip) randn(length(ip), coef_rank), nodes_part, 'UniformOutput', false);
             coefs_init =  num2cell(ones(d,1));
         else
-            [~,m_coef,prev_coef_rank] = TTranks(bf.denom_coefs);
+            [~,m_prev,prev_coef_rank] = TTranks(bf.denom_coefs);
             coef_init = bf.denom_coefs;
+            m_coef = cellfun(@length, nodes_part);
             for i = 1:num_vars
-                if length(nodes_part{i}) > m_coef(i)
+                if m_coef(i) > m_prev(i)
                     coef_init{i} = [coef_init{i}; zeros(prev_coef_rank(i),prev_coef_rank(i+1))];
                 end
             end
+
+            rand_init = TTrand(m_coef,coef_rank);
+            rand_init = TTorthogonalizeLR(rand_init);
+            rand_init{d} = rand_init{d}/norm(rand_init{d} ,'fro')*0.01;
+            coef_init = TTaxby(1,coef_init,1,rand_init);
+            coef_init = TTrounding(coef_init, tol, coef_rank);
         end
-        options.als_options.coefs_init = coefs_init;
+        options.als_options.coefs_init = coef_init;
     end
 
     % solve LS problem via ALS  
