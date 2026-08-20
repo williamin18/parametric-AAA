@@ -78,9 +78,9 @@ options.als_options.more_info = options.more_info;
 
 % in order to compute a real loewner matrix we need orthogonal transformation matrices  
 % and must ensure that data appears in complex conjugate pairs
-if options.real_loewner
-    [options.als_options.real_transforms.UL,sampling_values,samples] = init_JD(sampling_values,samples);
-end
+% if options.real_loewner
+%     [options.als_options.real_transforms.UL,sampling_values,samples] = init_JD(sampling_values,samples);
+% end
 %TODO: ensure real
 
 
@@ -160,7 +160,7 @@ while err_norm/norm_2_samples > tol && j < options.max_iter
             % coefs_init = cellfun(@(ip) randn(length(ip), coef_rank), nodes_part, 'UniformOutput', false);
             coefs_init =  num2cell(ones(d,1));
         else
-            [~,m_prev,prev_coef_rank] = TTranks(bf.denom_coefs);
+            [~,m_prev,prev_coef_rank] = TTsizes(bf.denom_coefs);
             coef_init = bf.denom_coefs;
             m_coef = cellfun(@length, nodes_part);
             for i = 1:num_vars
