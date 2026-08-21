@@ -44,7 +44,7 @@ if ~isfield(options,'change_tol')
 end
 
 if ~isfield(options,'max_iter')
-    options.max_iter = 50;
+    options.max_iter = 1000;
 end
 
 if ~isfield(options,'abs_tol')
@@ -73,6 +73,7 @@ end
 %guess, compute orthogonalized error TT-cores to optimize the error norm
 error_TT = cell(d,1);
 r_prod = r_samples.*r_coefs;
+R = cell(d,1); % store non-orthogonal parts during orthogonalization.
 for i = 1:d-1
     samples_i = reshape(samples{i},r_samples(i),m_max(i),r_samples(i+1));
     itpl_samples_i = samples_i(:,nodes_part{i},:);
@@ -100,18 +101,75 @@ for i = 1:d-1
     if i == 1
         %i = 1, r_prod(1) = 1
         error_TT{i} = [reshape(G,m_max(i),r_prod(i+1)) -reshape(H,m_max(i),r_prod(i+1))];
-        [error_TT{i}, R] = qr(error_TT{i},'econ');
+        [error_TT{i}, R{i}] = qr(error_TT{i},'econ');
     else
         error_TT{i}= zeros(r_prod(i)*2,m_max(i),r_prod(i+1)*2);
         error_TT{i}(1:r_prod(i),:,1:r_prod(i+1)) = G;
         error_TT{i}(r_prod(i)+1:2*r_prod(i),:,r_prod(i+1)+1:2*r_prod(i+1)) = -H;
-        error_TT{i} = R*reshape(error_TT{i},r_prod(i)*2,m_max(i)*r_prod(i+1)*2);
-        [error_TT{i}, R] = qr(h2v(error_TT{i},m_max(i)));
+        error_TT{i} = R{i-1}*reshape(error_TT{i},r_prod(i)*2,m_max(i)*r_prod(i+1)*2);
+        [error_TT{i}, R{i}] = qr(h2v(error_TT{i},m_max(i)));
     end
 end
 
 %Start ALS from the last TT-core
 direction = -1;
+i = d; %current index for the TT-core to be optimized
+for epoch = 1:options.max_iter
+    % The Frobenius norm of a k-orthogonal tensor train is the same as the 
+    % Frobenius norm of k-th TT-core, by orthogonalize both the coeffs and
+    % the current value of L*a, this become a least squares problem of one
+    % TT-core
+    
+    
+    %Compute the Loewner core for the current TT-core 
+    samples_i = reshape(samples{i},r_samples(i),m_max(i),r_samples(i+1));
+    itpl_samples_i = samples_i(:,nodes_part{i},:);
+    G = reshape(C{i},m_max(i),m_coefs(i),1,1).* permute(itpl_samples_i, [4 2 1 3]);
+    H = reshape(C{i},m_max(i),m_coefs(i),1,1).* permute(samples_i, [2 4 1 3]);
+
+    if i == 1
+
+    elseif i == d
+        R1 = rehsape(R{i-1}, size(R{i-1},1), r_samples(i), r_coefs(i), 2);
+        L = zeros(m_max(i), m_coefs(i), r_samples(i),2);
+        L(:,:,:,1) = G;
+        L(:,:,:,2) = H;
+        L = tensorprod(R1,L,[2 4],[3,4]);
+        L = permute(L, [1 3 2 4]);
+        L = reshape(L, [], r_coef(i)*m_coefs(i) );
+        %solve L *coef(i) = 0
+        
+    else
+    end
+
+
+
+    %Multiply the non-orthogonal term R from left and right
+
+    
+    %Solve least squares system to optimize the corresponding coefs TT-core
+
+
+    %Orthogonalize TT-core i for the coefs and error
+    if dir
+        %left to right ALS
+
+       
+
+    else
+        %right to left ALS
+        
+        if i == d 
+            %last TT-core
+            
+        else
+
+        end
+        
+    end
+
+end
+
 
 
 
